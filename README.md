@@ -1,8 +1,40 @@
 # PR2 - System Issues Management
 
 ## Author
-- name: #A. César Flores Carrera#
-- e-mail: #afloresca@uoc.edu#
+- name: **A. César Flores Carrera**
+- e-mail: **afloresca@uoc.edu**
+
+## Solution
+*In this section, all the modifications, and/or updates made to the initially proposed design, according to the official CAA1 solution, will be described
+along with its justification, additional data structure, hints on the new test suites, problems and comments*
+
+### Exception Definitions
+The following exception classes has been created. All of them inherit from DSException
+- ComponentAlreadyInstalledException.java
+- ComponentNotFoundException.java
+- IssueAlreadyAssignedException.java
+- IssueAlreadyResolvedException.java
+- IssueNotFoundException.java
+- NoIssuesException.java
+- NoSystemsException.java
+- NoWorkerException.java
+- SystemHasNoComponentsException.java
+- WorkerNotFoundException.java
+
+### Implementation of necessary model classes
+The following model classes have been implemented in package uoc.ds.pr.model
+to match the attributes and methods needed to their creation.
+
+- Component.java
+- Issue.java
+- System.java
+- Worker.java
+
+I've added Lombok dependency to create getters/setters automatically.
+
+### Implementation of _SystemIssuesPR2Impl_ class
+
+
 
 ## Overview
 

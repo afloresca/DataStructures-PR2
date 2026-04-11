@@ -1,6 +1,11 @@
 package uoc.ds.pr.model;
 
-public class System {
+import lombok.Data;
 
+@Data
+public class System {
+    String systemId;
+    String description;
+    String location;
 }
 
