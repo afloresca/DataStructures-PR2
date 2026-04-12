@@ -4,6 +4,7 @@ import edu.uoc.ds.adt.sequential.Stack;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import uoc.ds.pr.pr2.adt.sequential.StackLinkedList;
 
 public class StackLinkedListTest {
     Stack<Integer> stack;

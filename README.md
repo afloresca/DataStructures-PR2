@@ -23,18 +23,22 @@ The following exception classes has been created. All of them inherit from DSExc
 
 ### Implementation of necessary model classes
 The following model classes have been implemented in package uoc.ds.pr.model
-to match the attributes and methods needed to their creation.
+to match the attributes and methods needed to their creation and to pass the tests.
 
 - Component.java
 - Issue.java
 - System.java
 - Worker.java
 
-I've added Lombok dependency to create getters/setters automatically.
-
 ### Implementation of _SystemIssuesPR2Impl_ class
 
+### Implementation of _StackLinkedList_ class
+As it's specified in CCA1 solution, StackLinkedList class has been created.
+This class implements Stack and inherits from LinkedList, and in order to follow DSLib package specification
+it has been created inside adt.sequential package.
 
+### _SystemIssuesHelperImpl_ Implementation
+This class implements _SystemIssuesHelperImpl_. This class will handle operations over model
 
 ## Overview
 
