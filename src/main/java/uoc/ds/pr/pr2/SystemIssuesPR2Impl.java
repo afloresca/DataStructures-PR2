@@ -171,7 +171,8 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         if (components.isEmpty()){
             throw new SystemHasNoComponentsException("System has no components!!");
         }
-        return components.values();
+        System system = (System) systems.get(systemId);
+        return system.getComponents().values();
     }
 
     //@pre The worker exists.
