@@ -1,17 +1,15 @@
 package uoc.ds.pr.pr2;
 
-import edu.uoc.ds.adt.sequential.DictionaryArrayImpl;
-import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.model.Component;
 import uoc.ds.pr.model.System;
 import uoc.ds.pr.model.Worker;
 
 public class SystemIssuesHelperImpl implements SystemIssuesHelper {
-    DictionaryArrayImpl workers;
-    DictionaryArrayImpl systems;
-    DictionaryArrayImpl components;
+    Worker[] workers ;
+    System[] systems ;
+    Component[] components;
 
-    public SystemIssuesHelperImpl(DictionaryArrayImpl w, DictionaryArrayImpl s, DictionaryArrayImpl c){
+    public SystemIssuesHelperImpl(Worker[] w, System[] s, Component[] c){
         workers = w;
         systems = s;
         components = c;
@@ -19,32 +17,63 @@ public class SystemIssuesHelperImpl implements SystemIssuesHelper {
     }
     @Override
     public Worker getWorker(String id) {
-        return (Worker) workers.get(id);
+        Worker worker = null;
+        for (Worker w : workers){
+            if (w != null && w.getId().equals(id)){
+                worker = w;
+            }
+        }
+        return worker;
     }
 
     @Override
     public int numWorkers() {
-        return workers.size();
+        int count = 0;
+        for (Worker worker : workers) {
+            if (worker != null)
+                count++;
+        }
+        return count;
     }
 
     @Override
     public System getSystem(String id) {
-        return (System) systems.get(id);
+        System system = null;
+        for (System s : systems){
+            if (s!= null && s.getId().equals(id))
+                system = s;
+        }
+        return system;
     }
 
     @Override
     public int numSystems() {
-        return systems.size();
+        int count = 0;
+        for (System system : systems) {
+            if (system != null)
+                count++;
+        }
+        return count;
     }
 
     @Override
     public Component getComponent(String id) {
-        return (Component) components.get(id);
+        Component component = null;
+        for (Component c : components){
+            if (c!= null && c.getId().equals(id))
+                component = c;
+        }
+        return component;
     }
 
     @Override
     public int numComponents() {
-        return components.size();
+        int count = 0;
+        for (Component component : components) {
+            if (component != null)
+                count++;
+        }
+        return count;
     }
 
     @Override
@@ -55,9 +84,8 @@ public class SystemIssuesHelperImpl implements SystemIssuesHelper {
     @Override
     public int numIssues() {
         int numIssues = 0;
-        Iterator<Component> iterCom = components.values();
-        while (iterCom.hasNext()){
-            numIssues += iterCom.next().getIssues().size();
+        for (Component iterCom : components){
+            numIssues += iterCom.getIssues().size();
         }
         return numIssues;
     }

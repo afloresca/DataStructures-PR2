@@ -1,8 +1,8 @@
 package uoc.ds.pr.pr2;
 
-import edu.uoc.ds.adt.sequential.DictionaryArrayImpl;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.traversal.Iterator;
+import edu.uoc.ds.traversal.IteratorArrayImpl;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
 import uoc.ds.pr.model.System;
@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 
 public class SystemIssuesPR2Impl implements SystemIssues {
 
-    DictionaryArrayImpl<String, Worker> workers = new DictionaryArrayImpl<String, Worker>(MAX_WORKERS);
-    DictionaryArrayImpl<String, System> systems = new DictionaryArrayImpl<String, System>(MAX_SYSTEMS);
-    DictionaryArrayImpl<String, Component> components = new DictionaryArrayImpl<String, Component>(MAX_COMPONENTS);
-
+    Worker[] workers = new Worker[MAX_WORKERS];
+    System[] systems = new System[MAX_SYSTEMS];
+    Component[] components = new Component[MAX_COMPONENTS];
+    int workerIndex = 0, systemIndex = 0, componentIndex = 0;
 
     LinkedList<Issue> issues = new LinkedList<Issue>();
 
@@ -26,10 +26,7 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //      Otherwise, the worker’s data is updated.
     @Override
     public void addWorker(String workerId, String name, String address) {
-        Worker worker = new Worker(workerId, name, address);
-        //This method will search for the worker in the workers array, and if it exists it will update it
-        //if it not, it will create it.
-        workers.put(workerId, worker);
+        workers[workerIndex] = new Worker(workerId, name, address);
     }
 
     //To store systems, we use an array, since their number is known and relatively small, around a few hundred.
@@ -37,9 +34,7 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //@post If the system identifier is new, the number of systems increases by one. Otherwise, the system’s data is updated.
     @Override
     public void addSystem(String systemId, String description, String location) {
-        System system = new System(systemId, description, location);
-        //this method will update or add the system
-        systems.put(systemId, system);
+        systems[systemIndex] = new System(systemId, description, location);
     }
 
     //To store components, we use an array, since their number is known and relatively small, around a few hundred.
@@ -47,9 +42,7 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //@post If the component identifier is new, the number of components increases by one. Otherwise, the component’s data is updated.
     @Override
     public void addComponent(String componentId, String trademark, String model, String serial) {
-        Component component = new Component(componentId, trademark, model, serial);
-        //this method will update or add the component
-        components.put(componentId, component);
+        components[componentIndex] = new Component(componentId, trademark, model, serial);
     }
 
 
@@ -77,13 +70,13 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //       The component of the issue is updated.If the component does not exist, an error is reported.
     @Override
     public Issue createIssue(String issueId, String componentId, String description, LocalDateTime dateTime) throws ComponentNotFoundException {
-        if (!components.containsKey(componentId)){
+        Component component = systemIssuesHelper.getComponent(componentId);
+        if (component == null){
             throw new ComponentNotFoundException(); //if component does not exist, return an error
         }
         Issue issue = new Issue(issueId, description, dateTime);
         issues.insertEnd(issue); //add issue to issue's list
-        Component component = (Component) components.get(componentId); //add issue to component's issues list.
-        component.getIssues().insertEnd(issue);
+        component.getIssues().insertEnd(issue);//add issue to component's issues list.
         return issue;
     }
 
@@ -105,11 +98,11 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         if (issue.isResolved()){
             throw new IssueAlreadyResolvedException();
         }
-        if (!workers.containsKey(workerId)){
+        //Workers issues
+        Worker worker = systemIssuesHelper.getWorker(workerId);
+        if (worker == null){
             throw new WorkerNotFoundException();
         }
-
-        Worker worker = (Worker) workers.get(workerId);
         worker.getIssues().push(issue); //issue is pushed;
         issue.setWorker(worker); //it updates issue worker;
     }
@@ -140,10 +133,10 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //If the worker has no assigned issues, an error is reported.
     @Override
     public Issue solveIssue(String workerId) throws WorkerNotFoundException, NoIssuesException {
-        if (!workers.containsKey(workerId)){
+        Worker worker = systemIssuesHelper.getWorker(workerId);
+        if (worker == null){
             throw new WorkerNotFoundException("Worker Id does not exist!");
         }
-        Worker worker = (Worker) workers.get(workerId);
         if (worker.getIssues().isEmpty()){
             throw new NoIssuesException("Worker without issues yet!");
         }
@@ -158,21 +151,20 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //@post Returns an iterator over all systems.
     @Override
     public Iterator<System> getSystems() throws NoSystemsException {
-        if (systems.isEmpty()){
+        if (systemIndex == 0){
             throw new NoSystemsException("There are no Systems yet!");
         }
-        return systems.values();
+        return new IteratorArrayImpl<System>(systems, systemIndex, 0);
     }
 
     //@pre The system exists.
     //@post Returns an iterator over all components of a system.
     @Override
     public Iterator<Component> getComponentsBySystem(String systemId) throws SystemHasNoComponentsException {
-        if (components.isEmpty()){
+        if (componentIndex == 0){
             throw new SystemHasNoComponentsException("System has no components!!");
         }
-        System system = (System) systems.get(systemId);
-        return system.getComponents().values();
+        return new IteratorArrayImpl<Component>(components, componentIndex, 0);
     }
 
     //@pre The worker exists.
@@ -182,7 +174,7 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         if (issues.isEmpty()){
             throw new NoIssuesException("There are no issues yet");
         }
-        Worker worker = (Worker) workers.get(workerId);
+        Worker worker = systemIssuesHelper.getWorker(workerId);
 
         return worker.getCompletedIssues().values();
     }
@@ -192,14 +184,12 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //If there are none, an error is reported.
     @Override
     public Worker getTopWorker() throws NoWorkerException {
-        Worker topWorker = null, auxWorker;
-
-        if (workers.isEmpty()) {
+        Worker topWorker = null;
+        if (workerIndex == 0) {
             throw new NoWorkerException("There are no workers yet!!");
         }
-        Iterator<Worker> iter_worker = workers.values();
-        while (iter_worker.hasNext()){
-            auxWorker = iter_worker.next();
+
+        for (Worker auxWorker : workers){
             if (topWorker == null || auxWorker.getCompletedIssues().size() > topWorker.getCompletedIssues().size()){
                 topWorker = auxWorker;
             }
@@ -212,13 +202,11 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //If there are none, an error is reported.
     @Override
     public System getSystemWithMostComponents() throws NoSystemsException {
-        System topSystem = null, auxSystem;
-        if (systems.isEmpty()){
+        System topSystem = null;
+        if (systemIndex == 0){
             throw new NoSystemsException("There are no systems yet!!");
         }
-        Iterator<System>  iter_system = systems.values();
-        while (iter_system.hasNext()){
-            auxSystem = iter_system.next();
+        for (System  auxSystem : systems){
             if (topSystem == null || auxSystem.getComponents().size() > topSystem.getComponents().size()){
                 topSystem = auxSystem;
             }
