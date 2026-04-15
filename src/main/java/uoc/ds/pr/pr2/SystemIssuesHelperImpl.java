@@ -85,6 +85,8 @@ public class SystemIssuesHelperImpl implements SystemIssuesHelper {
     public int numIssues() {
         int numIssues = 0;
         for (Component iterCom : components){
+            if (iterCom == null)
+                continue;
             numIssues += iterCom.getIssues().size();
         }
         return numIssues;

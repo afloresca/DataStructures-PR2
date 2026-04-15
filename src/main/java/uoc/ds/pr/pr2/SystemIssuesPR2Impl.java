@@ -26,7 +26,33 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //      Otherwise, the worker’s data is updated.
     @Override
     public void addWorker(String workerId, String name, String address) {
-        workers[workerIndex] = new Worker(workerId, name, address);
+        int index = findWorkerIndex(workerId);
+        if (index < 0)
+            workers[workerIndex++] = new Worker(workerId, name, address);
+        else
+        {
+            workers[index].setName(name);
+            workers[index].setAddress(address);
+        }
+    }
+
+    /**
+        Finds the worker's index
+     */
+    private int findWorkerIndex(String workerId){
+        int i = 0;
+        boolean found = false;
+        for (Worker worker : workers){
+            found = (worker != null && worker.getId().equals(workerId));
+            if (found) {
+                break;
+            }
+            i++;
+        }
+        if (!found)
+            i = -1;
+
+        return i;
     }
 
     //To store systems, we use an array, since their number is known and relatively small, around a few hundred.
@@ -34,7 +60,34 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //@post If the system identifier is new, the number of systems increases by one. Otherwise, the system’s data is updated.
     @Override
     public void addSystem(String systemId, String description, String location) {
-        systems[systemIndex] = new System(systemId, description, location);
+        int index = findSystemIndex(systemId);
+        if (index < 0)  //if it does not exist, create it
+            systems[systemIndex++] = new System(systemId, description, location);
+        else{
+            systems[index].setDescription(description);
+            systems[index].setLocation(location);
+        }
+
+
+    }
+
+    /*
+        Look for the system index in the array
+     */
+    private int findSystemIndex(String id){
+        int i = 0;
+        boolean found = false;
+        for (System system : systems){
+            found = (system != null && system.getId().equals(id));
+            if (found) {
+                break;
+            }
+            i++;
+        }
+        if (!found)
+            i = -1;
+
+        return i;
     }
 
     //To store components, we use an array, since their number is known and relatively small, around a few hundred.
@@ -42,8 +95,36 @@ public class SystemIssuesPR2Impl implements SystemIssues {
     //@post If the component identifier is new, the number of components increases by one. Otherwise, the component’s data is updated.
     @Override
     public void addComponent(String componentId, String trademark, String model, String serial) {
-        components[componentIndex] = new Component(componentId, trademark, model, serial);
+        int index = findComponentIndex(componentId);
+        if (index < 0)
+            components[componentIndex++] = new Component(componentId, trademark, model, serial);
+        else{
+            components[index].setModel(model);
+            components[index].setSerial(serial);
+            components[index].setTrademark(trademark);
+        }
+
     }
+
+    /**
+        Look for the system index in the array
+    */
+    private int findComponentIndex(String id){
+        int i = 0;
+        boolean found = false;
+        for (Component component : components){
+            found = (component != null && component.getId().equals(id));
+            if (found) {
+                break;
+            }
+            i++;
+        }
+        if (!found)
+            i = -1;
+
+        return i;
+    }
+
 
 
     //@pre The component and the system exist.
@@ -143,7 +224,6 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         Issue workerIssue = worker.getIssues().pop();
         workerIssue.resolve(); //sets resolved to true
         worker.getCompletedIssues().insertEnd(workerIssue);
-        //TODO should Issues list be updated?
         return workerIssue;
     }
 
@@ -164,7 +244,8 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         if (componentIndex == 0){
             throw new SystemHasNoComponentsException("System has no components!!");
         }
-        return new IteratorArrayImpl<Component>(components, componentIndex, 0);
+
+        return systemIssuesHelper.getSystem(systemId).getComponents().values();
     }
 
     //@pre The worker exists.
@@ -174,9 +255,7 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         if (issues.isEmpty()){
             throw new NoIssuesException("There are no issues yet");
         }
-        Worker worker = systemIssuesHelper.getWorker(workerId);
-
-        return worker.getCompletedIssues().values();
+        return systemIssuesHelper.getWorker(workerId).getCompletedIssues().values();
     }
 
     //@pre True.
@@ -190,6 +269,8 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         }
 
         for (Worker auxWorker : workers){
+            if (auxWorker == null)
+                continue;
             if (topWorker == null || auxWorker.getCompletedIssues().size() > topWorker.getCompletedIssues().size()){
                 topWorker = auxWorker;
             }
@@ -207,6 +288,8 @@ public class SystemIssuesPR2Impl implements SystemIssues {
             throw new NoSystemsException("There are no systems yet!!");
         }
         for (System  auxSystem : systems){
+            if (auxSystem == null)
+                continue;
             if (topSystem == null || auxSystem.getComponents().size() > topSystem.getComponents().size()){
                 topSystem = auxSystem;
             }
