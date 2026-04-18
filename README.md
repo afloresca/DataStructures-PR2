@@ -170,8 +170,6 @@ It also defines three capacity constants:
 - `MAX_SYSTEMS = 150`
 - `MAX_COMPONENTS = 110`
 
-These constants explain why arrays are used in the implementation.
-
 ### `SystemIssuesPR2Impl.java`
 
 This class is the core of the project. It implements all business operations declared in `SystemIssues`.
@@ -363,7 +361,6 @@ This interface exposes read-only support operations that are useful for tests an
 - count issues by component
 - count issues assigned to a worker
 
-It separates operational logic from inspection logic.
 
 ### `SystemIssuesHelperImpl.java`
 
@@ -430,10 +427,6 @@ This means the total issue count is derived from component issue lists, not from
 
 - returns the size of the selected worker's assignment stack
 
-Important distinction:
-
-- this method counts currently assigned issues, not completed ones
-
 
 ## Tests results
 The project has run successfully all the tests
@@ -451,7 +444,9 @@ This is the central behavior test suite. It verifies:
 - iterator-based queries
 - top worker and top system calculations
 - exception handling for invalid operations
+- 
 #### 5 New tests has been added
+
 - getDoneIssuesByWorkerWithoutSolvedIssuesTest
   - Try to get Done Issues from a worker without solved issues, returns empty iterator
 -  updateWorkerDataTest
