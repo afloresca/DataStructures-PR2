@@ -16,7 +16,7 @@ And in all the new classes in the following packages
 - [uoc.ds.pr.model](#uocdsprmodel-Package)
 - [uoc.ds.pr.exceptions](#uocdsprexceptions-Package)
 
-New test classes and the final tests result can be found [at the end of this document](#tests-results)
+New test class and the final tests result can be found [at the end of this document](#tests-results)
 
 ## Project Structure
 
@@ -352,7 +352,7 @@ Their role is to locate entities inside arrays or linked lists without using Jav
 
 ### `SystemIssuesHelper.java`
 
-This interface exposes read-only support operations that are useful for tests and simple statistics:
+It exposes some support operations.
 
 - access entity by id
 - count workers, systems, and components
@@ -432,29 +432,19 @@ This means the total issue count is derived from component issue lists, not from
 The project has run successfully all the tests
 ![runtest.png](runtest.png)
 
-## Test Class
-### `SystemIssuesPR2Test.java`
-
-This is the central behavior test suite. It verifies:
-
-- insertion and update of workers, systems, and components
-- component installation into systems
-- issue creation and assignment
-- LIFO solving behavior
-- iterator-based queries
-- top worker and top system calculations
-- exception handling for invalid operations
-- 
+## New  Expanded Tests Class
+### `SystemIssuesPR2TestExpanded`
+ 
 #### 5 New tests has been added
 
-- getDoneIssuesByWorkerWithoutSolvedIssuesTest
+- **getDoneIssuesByWorkerWithoutSolvedIssuesTest**
   - Try to get Done Issues from a worker without solved issues, returns empty iterator
--  updateWorkerDataTest
+- **updateWorkerDataTest**
   - creates a user, it assigns issues, updates user, the user data has been updated, the issues still remain
-- updateSystemDataTest
+- **updateSystemDataTest**
   - creates a system, it assigns components, updates system, the system data has been updated, the components still remain
-- noTopWokerYet
+- **noTopWokerYet**
   - Tries to get the top Worker when there are no solved issues at all
-- noMostCompleteSystemYet
-  - Tries to get the most complete System when there is no component installed yet~~~~
+- **noMostCompleteSystemYet**
+  - Tries to get the most complete System when there is no component installed yet
 
