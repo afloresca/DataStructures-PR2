@@ -127,7 +127,7 @@ public class SystemIssuesPR2Impl implements SystemIssues {
 
 
 
-    //@pre The component and the system exist.
+    //@pre The component and the system exist. Therefore, we don't have to check component and system existence
     //@post The number of components in a system increases by one, and the component is associated with that system.
     //If the component is already installed in the system, an error is reported.
     //To store the components of a system, we use a linked list, since their number is unknown and very small, just a few units.
@@ -269,11 +269,14 @@ public class SystemIssuesPR2Impl implements SystemIssues {
         }
 
         for (Worker auxWorker : workers){
-            if (auxWorker == null)
+            if (auxWorker == null || auxWorker.getCompletedIssues().size() ==0)
                 continue;
             if (topWorker == null || auxWorker.getCompletedIssues().size() > topWorker.getCompletedIssues().size()){
                 topWorker = auxWorker;
             }
+        }
+        if (topWorker == null){
+            throw new NoWorkerException("There is no top worker yet!!");
         }
         return topWorker;
     }
@@ -288,12 +291,15 @@ public class SystemIssuesPR2Impl implements SystemIssues {
             throw new NoSystemsException("There are no systems yet!!");
         }
         for (System  auxSystem : systems){
-            if (auxSystem == null)
+            if (auxSystem == null || auxSystem.getComponents().size() == 0)
                 continue;
             if (topSystem == null || auxSystem.getComponents().size() > topSystem.getComponents().size()){
                 topSystem = auxSystem;
             }
         }
+        if (topSystem == null){
+            throw new NoSystemsException("There is no System with any component installed, yet!!");
+          }
         return topSystem;
     }
 

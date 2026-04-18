@@ -21,6 +21,7 @@ public class SystemIssuesHelperImpl implements SystemIssuesHelper {
         for (Worker w : workers){
             if (w != null && w.getId().equals(id)){
                 worker = w;
+                break;
             }
         }
         return worker;

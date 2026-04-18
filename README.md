@@ -6,13 +6,17 @@
 
 ## Solution
 
-This document explains the structure of the solution of the PR2 project, with emphasis on:
+This document explains the solution for PR2, implemented in the following classes
+- [SystemIssuesPR2Impl.java](#SystemIssuesPR2Impljava) that is an implementation of [SystemIssues.java](#SystemIssuesjava)
+- [SystemIssuesHelperImpl.java](#SystemIssuesHelperImpljava)
 
-- `SystemIssuesPR2Impl.java`
-- `SystemIssuesHelperImpl.java`
-- the remaining packages and their responsibilities
+And in all the new classes in the following packages
+- [uoc.ds.pr.pr2.adt.sequential](#uocdsprpr2adtsequential-Package)
+  - **StackLinkedList.java**
+- [uoc.ds.pr.model](#uocdsprmodel-Package)
+- [uoc.ds.pr.exceptions](#uocdsprexceptions-Package)
 
-The project implements a small issue management system for computer systems, components, workers, and technical incidents using the DSLib data structures required by the assignment.
+New test classes and the final tests result can be found [at the end of this document](#tests-results)
 
 ## Project Structure
 
@@ -25,26 +29,125 @@ Main source code is located under `src/main/java/uoc/ds/pr/` and is divided into
 
 Test code is located under `src/test/java/uoc/ds/pr/` and validates both behavior and architectural constraints.
 
-## How the System Works
-
-The application manages four core concepts:
-
-- `Worker`: a technician who can receive and solve issues
-- `System`: a physical or logical system installed in some location
-- `Component`: a device or part installed inside a system
-- `Issue`: a problem reported for a component
-
-The main relationships are:
-
-- a `System` contains many `Component` objects
-- a `Component` stores many `Issue` objects
-- a `Worker` stores assigned issues in a stack and solved issues in a linked list
+## Implementation
 
 The implementation uses:
 
 - fixed-size arrays for workers, systems, and components
 - linked lists for variable-size collections
 - a custom LIFO stack for issue assignment
+
+## `uoc.ds.pr.model` Package
+
+This package contains the domain entities used by the system.
+
+### `Worker.java`
+
+Represents a technician.
+
+Fields:
+
+- `id`
+- `name`
+- `address`
+- `StackLinkedList<Issue> issues`
+- `LinkedList<Issue> completedIssues`
+
+Meaning:
+
+- `issues` stores assigned pending work in LIFO order
+- `completedIssues` stores solved issues in completion order
+
+### `System.java`
+
+Represents a managed system.
+
+Fields:
+
+- `id`
+- `description`
+- `location`
+- `LinkedList<Component> components`
+
+Important method:
+
+- `isSystemComponent(String componentId)` checks whether a given component id is already installed
+
+### `Component.java`
+
+Represents a hardware or software component.
+
+Fields:
+
+- `id`
+- `trademark`
+- `model`
+- `serial`
+- `LinkedList<Issue> issues`
+
+Meaning:
+
+- each component keeps track of all issues reported against it
+
+### `Issue.java`
+
+Represents a reported incident.
+
+Fields:
+
+- `id`
+- `description`
+- `LocalDateTime dateTime`
+- `boolean resolved`
+- `Worker worker`
+
+Important methods:
+
+- `resolve()` marks the issue as solved
+- `setWorker(Worker worker)` stores the assigned technician
+
+## `uoc.ds.pr.pr2.adt.sequential` Package
+
+This new package contains the **custom stack implementation** required by the assignment.
+
+### `StackLinkedList.java`
+
+`StackLinkedList<E>` extends DSLib `LinkedList<E>` and implements DSLib `Stack<E>`.
+
+Supported operations:
+
+- `push(E e)`: inserts at the beginning
+- `pop()`: removes the first element
+- `peek()`: returns the element referenced by `top`
+- `isEmpty()`
+- `size()`
+- `values()`
+
+This class
+
+- will return assigned issues that must be solved in LIFO order
+- provides that behavior without using `java.util.Stack`
+
+## `uoc.ds.pr.exceptions` Package
+
+This package contains the checked exceptions used to enforce API preconditions and invalid states.
+
+### `DSException.java`
+
+Base exception for the project. All domain-specific exceptions inherit from it.
+
+### Specialized Exceptions
+
+- `ComponentAlreadyInstalledException`
+- `ComponentNotFoundException`
+- `IssueAlreadyAssignedException`
+- `IssueAlreadyResolvedException`
+- `IssueNotFoundException`
+- `NoIssuesException`
+- `NoSystemsException`
+- `NoWorkerException`
+- `SystemHasNoComponentsException`
+- `WorkerNotFoundException`
 
 ## `uoc.ds.pr.pr2` Package
 
@@ -86,7 +189,7 @@ This class is the core of the project. It implements all business operations dec
 
 Design choice:
 
-- workers, systems, and components are stored in arrays because their maximum size is bounded
+- workers, systems, and components are stored in arrays because their maximum size is known
 - issues are stored in a linked list because the total number is variable
 - the helper object receives references to the same arrays, so helper queries always see the current data
 
@@ -98,7 +201,7 @@ Behavior:
 
 - searches the worker array by id
 - if the id does not exist, inserts a new `Worker` at `workerIndex`
-- if the id already exists, it updates user's data and maintains its assigned and solverd issues
+- if the id already exists, it updates user's data and maintains its assigned and solved issues
 
 ##### `addSystem(String systemId, String description, String location)`
 
@@ -269,7 +372,7 @@ This class implements `SystemIssuesHelper` and acts as a query utility over the 
 #### Constructor
 
 ```java
-public SystemIssuesHelperImpl(Worker[] w, System[] s, Component[] c)
+public SystemIssuesHelperImpl(Worker[] w, System[] s, Component[] c);
 ```
 
 The constructor receives the same arrays owned by `SystemIssuesPR2Impl`. This means:
@@ -331,130 +434,13 @@ Important distinction:
 
 - this method counts currently assigned issues, not completed ones
 
-## `uoc.ds.pr.model` Package
-
-This package contains the domain entities used by the system.
-
-### `Worker.java`
-
-Represents a technician.
-
-Fields:
-
-- `id`
-- `name`
-- `address`
-- `StackLinkedList<Issue> issues`
-- `LinkedList<Issue> completedIssues`
-
-Meaning:
-
-- `issues` stores assigned pending work in LIFO order
-- `completedIssues` stores solved issues in completion order
-
-### `System.java`
-
-Represents a managed system.
-
-Fields:
-
-- `id`
-- `description`
-- `location`
-- `LinkedList<Component> components`
-
-Important method:
-
-- `isSystemComponent(String componentId)` checks whether a given component id is already installed
-
-### `Component.java`
-
-Represents a hardware or software component.
-
-Fields:
-
-- `id`
-- `trademark`
-- `model`
-- `serial`
-- `LinkedList<Issue> issues`
-
-Meaning:
-
-- each component keeps track of all issues reported against it
-
-### `Issue.java`
-
-Represents a reported incident.
-
-Fields:
-
-- `id`
-- `description`
-- `LocalDateTime dateTime`
-- `boolean resolved`
-- `Worker worker`
-
-Important methods:
-
-- `resolve()` marks the issue as solved
-- `setWorker(Worker worker)` stores the assigned technician
-
-## `uoc.ds.pr.pr2.adt.sequential` Package
-
-This package contains the custom stack implementation required by the assignment.
-
-### `StackLinkedList.java`
-
-`StackLinkedList<E>` extends DSLib `LinkedList<E>` and implements DSLib `Stack<E>`.
-
-Supported operations:
-
-- `push(E e)`: inserts at the beginning
-- `pop()`: removes the first element
-- `peek()`: returns the element referenced by `top`
-- `isEmpty()`
-- `size()`
-- `values()`
-
-Why it matters:
-
-- assigned issues must be solved in LIFO order
-- this class provides that behavior without using `java.util.Stack`
-
-## `uoc.ds.pr.exceptions` Package
-
-This package contains the checked exceptions used to enforce API preconditions and invalid states.
-
-### `DSException.java`
-
-Base exception for the project. All domain-specific exceptions inherit from it.
-
-### Specialized Exceptions
-
-- `ComponentAlreadyInstalledException`
-- `ComponentNotFoundException`
-- `IssueAlreadyAssignedException`
-- `IssueAlreadyResolvedException`
-- `IssueNotFoundException`
-- `NoIssuesException`
-- `NoSystemsException`
-- `NoWorkerException`
-- `SystemHasNoComponentsException`
-- `WorkerNotFoundException`
-
 
 ## Tests results
-The project has run succesfully all the test
+The project has run successfully all the tests
 ![runtest.png](runtest.png)
 
-
-## Test Packages and Support Files
-### `src/test/java/uoc/ds/pr`
-
-This package contains the main verification code.
-
-#### `SystemIssuesPR2Test.java`
+## Test Class
+### `SystemIssuesPR2Test.java`
 
 This is the central behavior test suite. It verifies:
 
@@ -465,71 +451,15 @@ This is the central behavior test suite. It verifies:
 - iterator-based queries
 - top worker and top system calculations
 - exception handling for invalid operations
+#### 5 New tests has been added
+- getDoneIssuesByWorkerWithoutSolvedIssuesTest
+  - Try to get Done Issues from a worker without solved issues, returns empty iterator
+-  updateWorkerDataTest
+  - creates a user, it assigns issues, updates user, the user data has been updated, the issues still remain
+- updateSystemDataTest
+  - creates a system, it assigns components, updates system, the system data has been updated, the components still remain
+- noTopWokerYet
+  - Tries to get the top Worker when there are no solved issues at all
+- noMostCompleteSystemYet
+  - Tries to get the most complete System when there is no component installed yet~~~~
 
-#### `ArchitectureTest.java`
-
-This test uses ArchUnit to forbid use of disallowed `java.util` classes such as:
-
-- `ArrayList`
-- `HashMap`
-- `Stack`
-- `LinkedList`
-
-The intention is to force use of DSLib data structures.
-
-#### `FactorySystemIssues.java`
-
-This test helper centralizes creation of the implementation:
-
-```java
-new SystemIssuesPR2Impl()
-```
-
-It allows tests to depend on the interface rather than the implementation type directly.
-
-### `src/test/java/uoc/ds/pr/util`
-
-Support classes for tests.
-
-#### `CSVUtil.java`
-
-Loads test data from CSV files and populates the system through public API calls.
-
-#### `DateUtils.java`
-
-Parses date and datetime values used in the tests.
-
-#### `StackLinkedListTest.java`
-
-Checks the behavior of the custom stack implementation.
-
-### `src/test/resources`
-
-Contains CSV datasets used by the tests:
-
-- `workers.csv`
-- `systems.csv`
-- `components.csv`
-- `installComponents2System.csv`
-- `issues.csv`
-- `issue_assignments.csv`
-
-These files define reproducible sample data for integration-style tests.
-
-## Data Flow Summary
-
-Typical usage sequence:
-
-1. Add workers, systems, and components.
-2. Install components into systems.
-3. Create issues linked to components.
-4. Assign issues to workers.
-5. Solve issues from each worker stack.
-6. Query statistics and iterators.
-
-Entity flow:
-
-- `Component` belongs to `System`
-- `Issue` belongs to `Component`
-- `Issue` can be assigned to `Worker`
-- `Worker` solves issues in stack order
